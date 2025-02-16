@@ -1,10 +1,39 @@
 # Deploy CDE on K8S cluster public
 
-Sau khi đã đi qua kiến trúc và các opensource để triển khai được CDE và đã thử nghiệm trên môi trường local, giờ tiến hành cài và thử nghiệm trên cụm k8s public
+After reviewing the architecture and the open-source projects used to deploy CDE and after testing it in a local environment, we now proceed to install and test it on a public Kubernetes cluster.
 
 **Chuẩn bị**
 
-1. 1 cụm k8s public với 1 master và 2 worker
+# Deploy CDE on K8S Cluster Public
+
+After reviewing the architecture and the open-source projects used to deploy CDE and after testing it in a local environment, we now proceed to install and test it on a public Kubernetes cluster.
+
+**Preparation**
+
+1. A public Kubernetes cluster with 1 master and 2 workers
+
+<div align="center">
+  <img width="1000" src="./images/k8s-public-1.png" alt="Kubernetes">
+</div>
+
+<br>
+
+Kubeconfig file:
+
+````yaml
+apiVersion: v1
+clusters:
+  - cluster:
+      certificate-authority-data: <<certificate-authority-data>>
+      server: https://117.1.28.67:6443
+    name: talent-2024-qjc85oferu
+contexts:
+  - context:
+      cluster: talent-2024-qjc85oferu
+      user: talent-2024-qjc85oferu-admin
+    name: talent-2024-qjc85oferu-admin@talent-2024-qjc85oferu
+current-context: talent-2024-qjc85oferu-admin@talent-2024-qjc85oferu
+kind: Config
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-1.png" alt="Kubernetes">
@@ -34,7 +63,7 @@ users:
     user:
       client-certificate-data: <<client-certificate-data>>
       client-key-data: <<client-key-data>>
-```
+````
 
 2. 1 public domain
 `cde-vdt.online`
@@ -62,15 +91,14 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 <br>
 
-Sau khi đã cài xong check trên cụm thấy các resource trong namespace `ingress-nginx`, trong đó có service `ingress-nginx-controller` được expose ra ngoài với kiểu `loadbalancer` và có external-ip là `117.1.28.84`
+After installation, check the cluster for the resources in the `ingress-nginx` namespace. In particular, the service `ingress-nginx-controller` is exposed externally as a LoadBalancer with an external IP of `117.1.28.84`.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-2.png" alt="Kubernetes">
 </div>
 <br>
 
-Tiếp đến cần trỏ domain vào external-ip `117.1.28.84` của ingress-nginx-controller
-Tạo 2 DNS records cùng với `type` A và name là `@` và `*`. Type `@` để `cde-vdt.online` có thể trỏ về được ip `117.1.28.84` và type `*` để các subdomain dạng `*.cde-vdt.online` cũng trỏ về được ip `117.1.28.84`
+Next, point your domain to the external IP `117.1.28.84 of` the `ingress-nginx-controller`. Create two A-type DNS records with names `@` and `*` so that `cde-vdt.online` and all its subdomains (e.g. \*.cde-vdt.online) point to the IP `117.1.28.84`.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-4.png" alt="Kubernetes">
@@ -94,9 +122,9 @@ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/
 
 <br>
 
-Sau khi đã cài xong `cert-manager` tiếp đến cần tạo `Issuer` hoặc `ClusterIssuer` là crd của Cert-Manager để tạo và quản lý các chứng chỉ. Cần tạo một `Issuer` hoặc `ClusterIssuer` cho [Let's Encrypt](https://cert-manager.io/docs/tutorials/acme/nginx-ingress/). Có hai loại Issuer cho Let's Encrypt: staging (test) và production. Dưới đây là file YAML để tạo một ClusterIssuer dùng Let's Encrypt staging và production.
+After installing `cert-manager`, create an `Issuer` or `ClusterIssuer` (a Cert-Manager CRD) for managing certificates. You need to create an `Issuer` or `ClusterIssuer` for [Let's Encrypt](https://cert-manager.io/docs/tutorials/acme/nginx-ingress/). There are two types for Let's Encrypt: staging (test) and production. Below are two YAML files that create a ClusterIssuer named letsencrypt-staging and one named letsencrypt-prod.
 
-`ClusterIssuer` có tên là `letsencrypt-staging` và `letsencrypt-prod`
+`ClusterIssuer` named `letsencrypt-staging` and `letsencrypt-prod`
 
 ```yaml
 apiVersion: cert-manager.io/v1
@@ -134,7 +162,7 @@ spec:
             class: nginx
 ```
 
-Sau khi apply 2 file yaml trên lấy ra thu được
+After applying these YAML files, you should see the corresponding resources created:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-8.png" alt="Kubernetes">
@@ -142,9 +170,9 @@ Sau khi apply 2 file yaml trên lấy ra thu được
 
 <br>
 
-Sau khi đã có clusterissuer như trên, từ giờ chỉ cần thêm spec `tls` vào cấu hình ingress là sẽ được cấp cert để sử dụng https
+Now that you have a ClusterIssuer, simply add a `tls` spec in your ingress configuration and a certificate will be issued for HTTPS.
 
-ví dụ triển khai ingress cho 1 service `nginx`
+For example, here is an ingress configuration for an `nginx` service:
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -174,11 +202,11 @@ spec:
                   number: 80
 ```
 
-Sau khi cấu hình xong, Cert-Manager sẽ tự động yêu cầu chứng chỉ từ Let's Encrypt.có thể kiểm tra quá trình yêu cầu chứng chỉ bằng lệnh:
+After the configuration is complete, Cert-Manager will automatically issue a certificate from Let's Encrypt.
 
 `kubectl describe certificate cde-vdt-online-tls`
 
-Truy cập đường link `cde-vdt.online` từ browser và thấy đã được cấp chứng chỉ để chạy https
+Access the link `cde-vdt.online` from your browser and you will see that a certificate has been issued to enable HTTPS.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-9.png" alt="Kubernetes">
@@ -186,7 +214,7 @@ Truy cập đường link `cde-vdt.online` từ browser và thấy đã được
 
 ## 3. Installing DEX oidc
 
-This allows us to authenticate to the Kubernetes API server using another identity provider. Using dex allows for multiple, plugable, identity backends.
+This allows us to authenticate to the Kubernetes API server using another identity provider. Using Dex allows for multiple, pluggable identity backends.
 
 I started using dex because it allowed me to add LDAP to Kubernetes, but for this demo I'll use GitHub as the AuthN of choice.
 
@@ -202,7 +230,7 @@ It's important to understand the flow:
 
 `GitHub > Settings > Developer Settings > OAuth Apps > Register a new application`
 
-ở đây để homepage url là `https:dex3.cde-vdt.online`
+Here, set the homepage URL to `https:dex3.cde-vdt.online`
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-10.png" alt="Kubernetes">
@@ -212,7 +240,7 @@ It's important to understand the flow:
   <img width="1000" src="./images/k8s-public-11.png" alt="Kubernetes">
 </div>
 
-Lấy và lưu lại clientID và Secret để sau này dùng
+Obtain and save the clientID and Secret for later use.
 
 ### 3.2 Setup Kubernetes API servers
 
@@ -261,11 +289,13 @@ exit
 
 ### 3.3 Install DEX
 
-Cài dex thông qua helm
+Install Dex via Helm.
 
-Chạy lệnh để add repo dex về helm `helm repo add dex https://charts.dexidp.io`
+Run the following command to add the Dex repository to Helm:
 
-sau đó cài dex với helm thông qua file values sau:
+`helm repo add dex https://charts.dexidp.io`
+
+Then install Dex with Helm using the following values file:
 
 ```yaml
 https:
@@ -337,9 +367,10 @@ extraIngressAnnotations:
   nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 ```
 
-chạy lênh `helm install dex dex/dex --values values.yaml -n dex` để cài dex lên cụm của mình
+Run the following command to install Dex on your cluster:
+`helm install dex dex/dex --values values.yaml -n dex`
 
-sau khi đã cài dex xong truy cập vào link `https://dex3.cde-vdt.online/.well-known/openid-configuration` để xem lại config
+After installing Dex, access the link `https://dex3.cde-vdt.online/.well-known/openid-configuration` to verify the configuration.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-13.png" alt="Kubernetes">
@@ -392,7 +423,7 @@ kubectl config set-context --current --user=talent-2024-qjc85oferu-admin
 kubectl create clusterrolebinding oidc-cluster-admin --clusterrole=cluster-admin --user='quangtuanitmo18@gmail.com'
 ```
 
-Test again, sau khi user `oidc` đã có quyền thực thi rồi:
+Test again with the `oidc` user (now that it has permissions):
 
 ```
 # use the oidc user
@@ -402,7 +433,7 @@ kubectl config set-context --current --user=oidc
 kubectl get pods -A
 ```
 
-Nó sẽ hiện lên màn hình xác thực với github do mình dã dùng github làm connector, sau khi xác thực trên github thì chuyển hướng về `dex` mà đã cài trên cụm để grant permission của user
+A GitHub login prompt should appear (since GitHub is used as the connector). After authentication via GitHub, Dex grants the user's permissions.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-15.png" alt="Kubernetes">
@@ -412,7 +443,7 @@ Nó sẽ hiện lên màn hình xác thực với github do mình dã dùng gith
   <img width="1000" src="./images/k8s-public-16.png" alt="Kubernetes">
 </div>
 
-sau khi user đã được authenticated thì get pod ra sẽ được kết quả như sau
+Once the user is authenticated, listing pods will produce the expected output:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-14.png" alt="Kubernetes">
@@ -420,7 +451,7 @@ sau khi user đã được authenticated thì get pod ra sẽ được kết qu�
 
 ### 3. Installing Eclipse-che
 
-Thực hiện cài eclipse-che bằng chectl, do vậy trước tiên cần cài chectl trước đã
+Next, install Eclipse Che using chectl. First, install chectl.
 
 **_Prerequisites_**
 
@@ -450,7 +481,7 @@ Thực hiện cài eclipse-che bằng chectl, do vậy trước tiên cần cài
     $ chectl --version
     ```
 
-Tiếp đến cài eclipse-che bằng chectl với file `che-cluster-patch.yaml dưới đây`
+Next, deploy Eclipse Che using chectl with the file `che-cluster-patch.yaml` shown below:
 
 ```yaml
 spec:
@@ -476,7 +507,7 @@ spec:
         CHE_OIDC_GROUPS__CLAIM: groups
 ```
 
-chạy lệnh để deploy eclips-che (chi tiết xem [tại đây](https://github.com/che-incubator/chectl))
+Deploy Eclipse Che with the following command (for details, refer to [here](https://github.com/che-incubator/chectl)):
 
 ```
 chectl server:deploy \
@@ -486,15 +517,15 @@ chectl server:deploy \
        --domain=cde-vdt.online
 ```
 
-Sau khi deploy che lên xong chạy lệnh `chectl dashboard:open` để bật dashboard của eclipse-che lên
+After deploying Che, run the command `chectl dashboard:open` to open the Eclipse Che dashboard.
 
-sau đó nó sẽ redirect sang dex để tiến hành grant permission
+You will then be redirected to Dex to grant the necessary permissions.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-17.png" alt="Kubernetes">
 </div>
 
-sau khi grant permission xong thì redirect ngược lại dashboard của eclipse-che
+After permission is granted, you will be redirected back to the Eclipse Che dashboard.
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-18.png" alt="Kubernetes">
@@ -502,60 +533,67 @@ sau khi grant permission xong thì redirect ngược lại dashboard của eclip
 
 <br>
 
-Giờ tiền hành tạo thử dev workspace, tạo dev workspace từ repo github `https://github.com/quangtuanitmo18/quarkus-api-example`
-trong đó có sẵn devfile để tạo dev workspace
+Now, create a development workspace as a test. Create a dev workspace from the GitHub repository `https://github.com/quangtuanitmo18/quarkus-api-example` which already contains a devfile.
 
-Devfile định nghĩa 3 thành phần chính trong workspace:
+The devfile defines three main components in the workspace:
 
 **components**
 
 1. tools (container):
 
-   - image: Sử dụng image quay.io/devfile/universal-developer-image:ubi8-latest, là một môi trường phát triển phổ biến.
-   - env: Biến môi trường cho container này:
-     QUARKUS_HTTP_HOST: Đặt giá trị 0.0.0.0 để Quarkus lắng nghe các kết nối trên tất cả các giao diện mạng.
+   - image: Uses quay.io/devfile/universal-developer-image:ubi8-latest, which is a popular development environment.
+   - env: Environment variables for this container:
+     QUARKUS_HTTP_HOST: Set to 0.0.0.0 so Quarkus listens on all network interfaces.
    - endpoints:
-     - Cổng debug (5005/tcp) dùng để debug Quarkus. Cổng này không được public.
-     - Cổng list-all-food (8080/http), là cổng public cho ứng dụng web Quarkus, sẽ phục vụ API tại đường dẫn /food.
-   - memoryLimit: Giới hạn bộ nhớ cho container là 6G.
-
-   - mountSources: Gắn mã nguồn của dự án vào container này.
+     Debug port (5005/tcp) used for debugging Quarkus. This port is not public.
+     Public port list-all-food (8080/http), which serves the Quarkus web API at /food.
+   - memoryLimit: 6G.
+   - mountSources: Mounts the project source code into the container.
 
 2. postgresql (container):
-   - image: Sử dụng image PostgreSQL từ quay.io/centos7/postgresql-13-centos7.
-   - env: Các biến môi trường cấu hình cho PostgreSQL:
-     POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE: Đặt các thông tin đăng nhập và tên cơ sở dữ liệu.
-   - PGDATA: Đặt đường dẫn lưu trữ dữ liệu PostgreSQL là /tmp/pgdata.
+
+   - Image: Uses quay.io/centos7/postgresql-13-centos7.
+   - env: Environment variables to configure PostgreSQL:
+     POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE: Set the login information and database name.
+   - PGDATA: Sets the PostgreSQL data storage path to /tmp/pgdata.
+
 3. ubi-minimal (container):
 
-   - image: Sử dụng image registry.access.redhat.com/ubi8/ubi-minimal, là một image tối thiểu từ Red Hat.
-   - command và args: Container này sẽ chạy lệnh tail -f /dev/null để duy trì trạng thái hoạt động mà không làm gì khác.
-   - memoryLimit: Giới hạn bộ nhớ là 64M.
-
-   - mountSources: Gắn mã nguồn vào container này. 5.
+   - Image: Uses registry.access.redhat.com/ubi8/ubi-minimal, a minimal image from Red Hat.
+   - ommand and args: This container will run tail -f /dev/null to keep it active without doing anything else.
+   - memoryLimit: 64M.
+   - mountSources: Mounts the source code into the container.
 
 **commands**
 
-Devfile định nghĩa một số lệnh để thực hiện các tác vụ khác nhau:
+The devfile defines several commands to perform various tasks:
 
 1. package
-   - Lệnh này thực hiện quá trình build ứng dụng Quarkus mà không chạy các bài test (./mvnw clean package -DskipTests=true).
-   - Đây là lệnh build mặc định cho workspace (isDefault: true).
+
+   - This command builds the Quarkus application without running tests (./mvnw clean package -DskipTests=true).
+   - This is the default build command for the workspace (isDefault: true).
+
 2. runtests
-   - Lệnh này chạy các bài kiểm thử của dự án (./mvnw test).
+
+   - This command runs the project tests (./mvnw test).
+
 3. packagenative
-   - Build ứng dụng Quarkus ở chế độ native image (./mvnw package -Dnative) với giới hạn bộ nhớ 3G.
+
+   - Builds the Quarkus application into a native image (./mvnw package -Dnative) with a memory limit of 3G.
+
 4. buildimage
-   - Build image Docker cho ứng dụng sử dụng Podman (podman build).
+   - Builds a Docker image for the application using Podman (podman build).
 5. loginlocalregistry
-   - Đăng nhập vào registry của OpenShift nội bộ bằng Podman (podman login).
+
+   - Logs in to the internal OpenShift registry using Podman (podman login).
+
 6. pushimage
-   - Push image đã build lên registry của OpenShift (podman push).
+   - Pushes the built image to the OpenShift registry (podman push).
 7. startdev
-   - Bắt đầu chế độ phát triển của Quarkus, bao gồm hỗ trợ hot reload và debug (./mvnw compile quarkus:dev).
-   - Đây là lệnh mặc định khi chạy ứng dụng (isDefault: true).
+   - Starts Quarkus in development mode with hot reload and debug support (./mvnw compile quarkus:dev).
+   - This is the default run command for the application (isDefault: true).
 8. startnative
-   - Chạy phiên bản native của ứng dụng (./quarkus-api-example-1.0.0-SNAPSHOT-runner) trong container ubi-minimal.
+   - Runs the native version of the application (./quarkus-api-example-1.0.0-SNAPSHOT-runner) in the ubi-minimal container.
 
 ```yaml
 schemaVersion: 2.1.0
@@ -672,45 +710,46 @@ commands:
         kind: run
 ```
 
-Có thể tạo dev workspace trên dashboard của eclipse-che hoặc truy cập vào đường link `https://cde-vdt.online/#https://github.com/quangtuanitmo18/quarkus-api-example` thì dev workspace sẽ tự động được tạo
+You can create a dev workspace on the Eclipse Che dashboard or access the link
+`https://cde-vdt.online/#https://github.com/quangtuanitmo18/quarkus-api-example`
 
-đường link trên sẽ có cấu trúc như sau
+The link will have the following structure:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-19.png" alt="Kubernetes">
 </div>
 
-sau đó quá trình tạo dev workpsace sẽ diễn ra
+The workspace creation process will then proceed:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-20.png" alt="Kubernetes">
 </div>
 
-sau khi tạo xong ta đã có một môi trường code trên browser
+Once created, you will have a browser-based code environment:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-21.png" alt="Kubernetes">
 </div>
 
-check lại các command đã khai báo ở devfile
+Check the commands defined in the devfile:
 
 <div align="center">
   <img width="1000" src="./images/k8s-public-22.png" alt="Kubernetes">
 </div>
 
-chạy command `start development mode lên`
+Run command to start development mode `start development mode`
 
 <div align="center">
 <img width="1000" src="./images/k8s-public-23.png" alt="Kubernetes">
 
 </div>
 
-Sau khi ứng dụng đã được build xong thì hiện lên 1 đường link để truy cập vào
+After the application is built, a link will appear to access it.
 
-Kiểm tra lại các resrouce trên namespace của dev workspace mới được tạo
+Verify the resources in the namespace of the newly created dev workspace:
 
 <div align="center">
 <img width="1000" src="./images/k8s-public-24.png" alt="Kubernetes">
 </div>
 
-#### cài thêm monitoring rồi đo performance
+#### Additionally, install monitoring and measure performance.

@@ -1,144 +1,131 @@
 # Kubernetes
 
-## 1. Kubernetes là gì
+## 1. What is Kubernetes?
 
-### 1.1 Giới thiệu về Kubernetes
+### 1.1 Introduction to Kubernetes
 
 <div align="center">
   <img width="1000" src="./images/k8s.png" alt="Kubernetes">
 </div>
 
 <div align="center">
-  <i><a href=https://kubernetes.io/vi/docs/concepts/overview/what-is-kubernetes>
-         Giới thiệu về Kubernetes
+  <i><a href="https://kubernetes.io/vi/docs/concepts/overview/what-is-kubernetes">
+         Introduction to Kubernetes
     </a></i>
 </div>
 
-Kubernetes là một nền tảng nguồn mở, khả chuyển, có thể mở rộng để quản lý các ứng dụng được đóng gói và các service, giúp thuận lợi trong việc cấu hình và tự động hoá việc triển khai ứng dụng. Kubernetes là một hệ sinh thái lớn và phát triển nhanh chóng. Các dịch vụ, sự hỗ trợ và công cụ có sẵn rộng rãi.
+Kubernetes is an open-source, portable, and scalable platform for managing containerized applications and services. It simplifies application deployment and configuration automation. Kubernetes has a vast and rapidly growing ecosystem, with many available tools, services, and community supports.
 
-Tên gọi Kubernetes có nguồn gốc từ tiếng Hy Lạp, có ý nghĩa là người lái tàu hoặc hoa tiêu. Google mở mã nguồn Kubernetes từ năm 2014. Kubernetes xây dựng dựa trên một thập kỷ rưỡi kinh nghiệm mà Google có được với việc vận hành một khối lượng lớn workload trong thực tế, kết hợp với các ý tưởng và thực tiễn tốt nhất từ cộng đồng.
+The name “Kubernetes” originates from Greek and means "helmsman" or "pilot." Google open-sourced Kubernetes in 2014, building on over a decade and a half of experience running large-scale workloads in production and incorporating the best ideas and practices from the community.
 
-**Quay ngược thời gian**
+**Looking Back in Time**
 
-Chúng ta hãy xem tại sao Kubernetes rất hữu ích bằng cách quay ngược thời gian.
+Let’s explore why Kubernetes is so valuable by taking a look back at previous deployment eras.
 
 <div align="center">
   <img width="1000" src="./images/k8s-2.png" alt="Kubernetes">
 </div>
 
-**_Thời đại triển khai theo cách truyền thống:_** Ban đầu, các ứng dụng được chạy trên các máy chủ vật lý. Không có cách nào để xác định ranh giới tài nguyên cho các ứng dụng trong máy chủ vật lý và điều này gây ra sự cố phân bổ tài nguyên. Ví dụ, nếu nhiều ứng dụng cùng chạy trên một máy chủ vật lý, có thể có những trường hợp một ứng dụng sẽ chiếm phần lớn tài nguyên hơn và kết quả là các ứng dụng khác sẽ hoạt động kém đi. Một giải pháp cho điều này sẽ là chạy từng ứng dụng trên một máy chủ vật lý khác nhau. Nhưng giải pháp này không tối ưu vì tài nguyên không được sử dụng đúng mức và rất tốn kém cho các tổ chức để có thể duy trì nhiều máy chủ vật lý như vậy.
+**_The Era of Traditional Deployment:_**  
+Originally, applications were run on physical servers. There was no clear method for delineating resource boundaries among applications on the same physical server, which often led to resource allocation issues. For instance, if multiple applications ran on a single physical server, one might consume the majority of the resources while others suffered from reduced performance. One solution was to run each application on a separate physical server; however, this approach was inefficient because resources were underutilized and maintaining numerous physical servers was costly.
 
-**_Thời đại triển khai ảo hóa:_** Như một giải pháp, ảo hóa đã được giới thiệu. Nó cho phép bạn chạy nhiều Máy ảo (VM) trên CPU của một máy chủ vật lý. Ảo hóa cho phép các ứng dụng được cô lập giữa các VM và cung cấp mức độ bảo mật vì thông tin của một ứng dụng không thể được truy cập tự do bởi một ứng dụng khác.
+**_The Era of Virtualization:_**  
+Virtualization was introduced as an alternative solution. It allows multiple virtual machines (VMs) to run on the same physical server CPU. Virtualization provides isolation between applications running in different VMs and enhances security by ensuring that one application's data cannot be freely accessed by another.
 
-Ảo hóa cho phép sử dụng tốt hơn các tài nguyên trong một máy chủ vật lý và cho phép khả năng mở rộng tốt hơn vì một ứng dụng có thể được thêm hoặc cập nhật dễ dàng, giảm chi phí phần cứng và hơn thế nữa. Với ảo hóa, bạn có thể có một tập hợp các tài nguyên vật lý dưới dạng một cụm các máy ảo sẵn dùng.
+Virtualization improves resource utilization on physical servers, eases scalability by enabling quick addition or updates to applications, reduces hardware costs, and more. With virtualization, a pool of physical resources acts as a cluster of readily available virtual machines. Each VM is a fully functional computer running its own operating system atop virtualized hardware.
 
-Mỗi VM là một máy tính chạy tất cả các thành phần, bao gồm cả hệ điều hành riêng của nó, bên trên phần cứng được ảo hóa.
+**_The Era of Containers:_**  
+Containers are similar to VMs but offer an additional level of isolation by sharing the host’s operating system. This makes containers lightweight. Like VMs, a container has its own filesystem, CPU, memory, and process space. Because they are decoupled from the underlying infrastructure, containers are highly portable across different clouds or OS distributions.
 
-**_Thời đại triển khai Container:_** Các container tương tự như VM, nhưng chúng có tính cô lập để chia sẻ Hệ điều hành (HĐH) giữa các ứng dụng. Do đó, container được coi là nhẹ (lightweight). Tương tự như VM, một container có hệ thống tệp (filesystem), CPU, bộ nhớ, process space, v.v. Khi chúng được tách rời khỏi cơ sở hạ tầng bên dưới, chúng có thể khả chuyển (portable) trên cloud hoặc các bản phân phối Hệ điều hành.
+Containers have become popular because they offer many benefits, including:
 
-Các container đã trở nên phổ biến vì chúng có thêm nhiều lợi ích, chẳng hạn như:
+- **Agile Application Development & Deployment:** It is faster and more efficient to create container images compared to VM images.
+- **Continuous Integration & Continuous Deployment:** Frequent and reliable builds and deployments are possible with easy rollbacks.
+- **Dev and Ops Separation:** Applications are built into container images during build/release rather than at deployment—decoupling them from the infrastructure.
+- **Enhanced Observability:** Beyond operating system metrics, you can monitor application health and other signals.
+- **Consistent Environments:** The same container can run on a developer's laptop, in testing, and in production.
+- **Portability:** Containers can run on various operating systems like Ubuntu, RHEL, CoreOS, on-premises, or in cloud environments.
+- **Centralized Application Management:** It abstracts running an operating system on virtual hardware to running an application on logical resources.
+- **Elastic Micro-Services:** Applications are split into smaller, independent services that can scale and be managed separately rather than as a monolithic application.
+- **Resource Isolation and Efficient Utilization:** Leading to predictable performance and optimal use of resources.
 
-- Tạo mới và triển khai ứng dụng Agile: gia tăng tính dễ dàng và hiệu quả của việc tạo các container image so với việc sử dụng VM image.
-- Phát triển, tích hợp và triển khai liên tục: cung cấp khả năng build và triển khai container image thường xuyên và đáng tin cậy với việc rollbacks dễ dàng, nhanh chóng.
-- Phân biệt giữa Dev và Ops: tạo các images của các application container tại thời điểm build/release thay vì thời gian triển khai, do đó phân tách các ứng dụng khỏi hạ tầng.
-- Khả năng quan sát không chỉ hiển thị thông tin và các metric ở mức Hệ điều hành, mà còn cả application health và các tín hiệu khác.
-- Tính nhất quán về môi trường trong suốt quá trình phát triển, testing và trong production: Chạy tương tự trên laptop như trên cloud.
-- Tính khả chuyển trên cloud và các bản phân phối HĐH: Chạy trên Ubuntu, RHEL, CoreOS, on-premises, Google Kubernetes Engine và bất kì nơi nào khác.
-- Quản lý tập trung ứng dụng: Tăng mức độ trừu tượng từ việc chạy một Hệ điều hành trên phần cứng ảo hóa sang chạy một ứng dụng trên một HĐH bằng logical resources.
-- Các micro-services phân tán, elastic: ứng dụng được phân tách thành các phần nhỏ hơn, độc lập và thể được triển khai và quản lý một cách linh hoạt - chứ không phải một app nguyên khối (monolithic).
-- Cô lập các tài nguyên: dự đoán hiệu năng ứng dụng
-- Sử dụng tài nguyên: hiệu quả
+### 1.2 When Should You Use Kubernetes?
 
-### 1.2 Nên sử dụng Kubernetes khi nào?
+- When you need rapid system scaling and are already using containers (such as Docker).
+- For services that require deploying a large number of containers.
+- When your project demands future scalability.
 
-- Khi cần phải scaling hệ thống nhanh chóng, và đã sử dụng container (Docker).
-- Khi số lượng container đủ lớn cho các dịch vụ
-- Các dự án xác định cần scale hệ thống về sau
+### 1.3 What Problems Does Kubernetes Solve?
 
-### 1.3 Kubernetes giải quyết vấn đề gì?
+Running applications in containers solves many issues, but imagine managing over a thousand containers—how do you know which container belongs to which application or project? And if you need to scale an application by running multiple containers, how do you route user requests to the correct containers? What if a physical server fails and can no longer operate? Kubernetes addresses these challenges by:
 
-Chạy ứng dụng bằng container sẽ giúp ta rất nhiều vấn đề, nhưng ta hãy thử tưởng tượng nếu số container ta lên tới hơn 1000 thì làm cách nào ta biết được một container nào đó sẽ thuộc về ứng dụng nào hoặc nó thuộc project nào? Và nếu ta muốn tăng performance của ứng dụng bằng cách cho nó chạy bằng 2 hoặc 3 container thì làm cách nào ta có thể dẫn request người dùng tới ứng dụng mà có 2 hoặc 3 container đó, ta sẽ chỉa tới container nào? Và nếu server vật lý của chúng ta bị sự cố và không thể chạy nữa thì sao? Kubernetes sẽ giúp chúng ta giải quyết những vấn đề này nhiều nhất có thể.
+- Managing a large number of Docker hosts.
+- Scheduling containers.
+- Performing rolling updates.
+- Scaling and auto-scaling.
+- Monitoring the lifecycle and health status of containers.
+- Self-healing by detecting and correcting failures automatically.
+- Providing service discovery.
+- Balancing load.
+- Handling data management, worker nodes, and logs.
+- Treating infrastructure as code.
+- Facilitating integration and scalability with other systems.
 
-**_Kubernetes sinh ra để giải quyết các vấn đề sau:_**
-
-- Việc quản lý hàng loạt docker host
-- Container Scheduling
-- Rolling update
-- Scaling/Auto Scaling
-- Monitor vòng đời và tình trạng sống chết của container.
-- Self-hearing trong trường hợp có lỗi xãy ra. (Có khả năng phát hiện và tự correct lỗi)
-- Service discovery
-- Load balancing
-- Quản lý data, work node, log
-- Infrastructure as Code
-- Sự liên kết và mở rộng với các hệ thống khác
-
-## 2. Kiến trúc của Kubernetes
+## 2. Kubernetes Architecture
 
 <div align="center">
   <img width="1000" src="./images/k8s-3.png" alt="Kubernetes">
 </div>
 
-Hệ thống Kubernetes gồm 2 phần chính gọi là **Control Plane** và **Data Plane** hay còn gọi là **Master Node** và **Worker Node**. Trong đó Master Node sẽ đóng vai trò xử lý các tác vụ quản lý, điều khiển của hệ thống, còn Worker Node sẽ là nơi xử lý các work load của hệ thống. Các pod sẽ được tạo và chạy trên các Worker Node này.
+A Kubernetes system consists of two main components: the **Control Plane** (or Master Node) and the **Data Plane** (or Worker Node). The Master Node handles system management and control tasks, while the Worker Nodes run the workloads. Pods are created and executed on the Worker Nodes.
 
-Trên các Master Node sẽ có 4 thành phần chính gồm:
+On the Master Nodes, there are four main components:
 
-**etcd:** Là một cơ sở dữ liệu dạng key-value có tính khả dụng và đồng nhất cao. Etcd là nơi K8S lưu trữ toàn bộ các thông tin cấu hình của hệ thống
+- **etcd:** A highly available and consistent key-value database that stores all the configuration data of the system.
+- **Controllers:** Background processes running on the Master Node that continuously monitor the state of the Kubernetes cluster via APIs and make necessary adjustments to reach the desired state.
+- **kube-apiserver:** The core component of the Kubernetes Master, which exposes HTTP APIs. It enables communication between end users and various components in the Kubernetes cluster and allows users to retrieve information (e.g., Pods, Namespaces, Services) via kubectl or direct REST API calls.
+- **kube-scheduler:** The default service that assigns Pods to run on specific nodes. It examines Pods that have been created but not yet scheduled, determines which nodes meet the specified requirements, and assigns the Pods to the most suitable nodes. If no node can satisfy the requirements, the Pod remains unscheduled until an appropriate node becomes available.
 
-**controller:** Là một tiến trình chạy nền trên các Master Node. Các tiến trình này chạy liên tục để điều tiết trạng thái của hệ thống Kubernetes. Trong K8S, controller là một vòng lặp điều khiển giám sát trạng thái của cluster được chia sẻ qua qua các api và thực hiện các thay đổi cần thiết để chuyển trạng của cluster tới trạng thái mong muốn.
+On the Worker Nodes, the primary components include:
 
-**kube api-server:** Đây là core của K8S Master, nó mở ra các HTTP API cho phép người dùng cuối cũng như các thành phần khác nhau trong chính K8S cluster có thể trao đổi thông tin với nhau. K8S API cho phép người dùng lấy thông tin về trạng thái của các đối tượng trong hệ thống như Pods, Namespaces, Services... Hầu hết các tác vụ sử dụng kube-api thông qua lệnh kubectl nhưng cũng có thể gọi trực tiếp REST API.
+- **kubelet:** Acts as the node agent by registering the node with the Kubernetes cluster, receiving Pod deployment instructions from the API server, and ensuring the containers run properly. Note that kubelet only manages containers that Kubernetes creates.
+- **kube-proxy:** A network proxy that runs on every node, managing network rules to allow communication to the Pods from within or outside the cluster.
+- **Container Runtime:** The component responsible for running containers. Common container runtimes supported by Kubernetes include Docker and Containerd.
 
-**kube-scheduler:** Đây là service mặc định của K8S làm nhiệm vụ phân phối Pod sẽ được chạy trên node nào. Mỗi Container bên trong Pod có thể có những yêu cầu khác nhau, hoặc ngay các Pod cũng có yêu cầu khác nhau. Do đó nhiệm vụ của Scheduler là tìm kiếm các node thỏa mãn các điều kiện trên và lựa chọn node tối ưu nhất để chạy. Tron trường hợp không có node nào thỏa mãn các điều kiện đặt ra thì Pod sẽ ở trạng thái chưa được lên lịch thực hiện cho tới khi Scheduler tìm được node phù hợp.
+### 2.1 Pod Lifecycle
 
-Trên các Worker Node sẽ có các thành phần chính gồm:
+**Creating a Pod**
 
-**kubelet:** Nó đóng vai trò như một "Node Agent" của K8s trên các Worker Node. Nhiệm vụ của nó để Worker Node được đăng ký và quản lý bởi cụm K8S cũng như là nhận nhiệm vụ triển khai các Pod (thường thông qua kube api-server) và đảm báo các container đó chạy ổn định. Lưu ý là kubelete không quản lý các container không được tạo bởi Kubernetes
-**kube-proxy:** Kube-proxy là một network proxy chạy trên mỗi node trong K8S cluster, thực hiện một phần Kubernetes Service. Kube-proxy duy trình network rules trên các node. Những network rules này cho phép kết nối mạng đến các pods từ trong hoặc ngoài cluster.
-**Container runtime:** Đây là thành phần có trách nhiệm cho việc chạy các container. Một số container runtime điển hình mà k8s hỗ trợ gồm có Docker và Containerd.
-
-### 2.1 Vòng đời của Pod (Pod lifecycle)
-
-**Tạo Pod**
-Khi tạo một Pod mới, thì cơ bản các sự kiện diễn ra và các thành phần tham gia và các sự kiện đó như sau:
+When a new Pod is created, the following sequence of events and components is involved:
 
 <div align="center">
   <img width="1000" src="./images/k8s-4.png" alt="Kubernetes">
 </div>
 
-Chi tiết luồng tạo Pod:
+Detailed flow for creating a Pod:
 
-1. Khi ta thực hiện tạo một Pod mới, thông tường là dùng lệnh kubectl để apply một file yaml là file mô tả chi thiết các thông tin cần thiết cho việc tạo Pod. Khi đó bản chất lệnh kubectl sẽ làm việc với api-server để gọi một api tương ứng cho việc tạo Pod.
+1. When you create a new Pod (typically by applying a YAML file with kubectl), the command sends a request to the API server to create the Pod based on the detailed description in the YAML.
+2. The API server validates the YAML file. If there are no errors, it writes the Pod’s details into etcd, the key-value database described earlier. At this moment, the system has recorded that a new Pod should be created. After the data is stored, the API server responds to the client, confirming the creation of the Pod.
+3. Next, the scheduler monitors the API server for newly created Pods that have not yet been assigned to any node. Upon detecting such a Pod, the scheduler retrieves its information and finds a node (e.g., node1) that meets the Pod’s requirements, then updates the Pod’s specification to indicate that it should run on node1. This update is sent back to the API server.
+4. The API server receives the assignment information for the new Pod, updates etcd accordingly, and marks the Pod as "Bound" to a node.
+5. The kubelet on node1, which continuously monitors for Pods in the "Bound" state scheduled to run on it, detects the new Pod. It then retrieves the necessary information for the Pod and launches it as one or more containers on node1, subsequently updating the Pod’s status back to the API server.
+6. Finally, when the API server receives the status update from kubelet on node1, it stores the updated information in etcd and sends an acknowledgement back to the kubelet indicating that the update has been accepted.
 
-2. API server xử lý yêu cầu trên bằng cách validate cú pháp của file yaml và nếu không có vấn đề gì thì sẽ thực hiện ghi dữ liệu này vào etcd - Là key-value db đã mô tả bên trên. Như vậy tại thời điểm này, trên hệ thống đã ghi nhận một Pod mới cần được tạo. Sau khi ghi xong vào etcd thì api-server phản hồi lại kết quả cho client là Pod đã được tạo.
+**Deleting a Pod**
 
-3. Lúc này tới lượt scheduler tham gia vào. Như đã nói, nó sẽ theo dõi các Pod mới tạo trên hệ thống (bằng cách định kỳ kiểm tra api-server xem có thay đổi không) mà chưa được gán vào node để xử lý. Giờ nó phát hiện ra Pod mới này, nó sẽ lấy thông tin của Pod này và tìm một node thỏa mãn các yêu cầu, ví dụ là node1 và update vào thông tin của Pod là nó hãy chạy trên node1. Thông tin này được scheduler gửi cho api-server
-
-4. API server nhận được thông tin Pod mới được gán vào node1 thì thực hiện update thông tin này và etcd. Lúc nào pod ở trạng thái bound.
-
-5. Tiếp đến là kubelet cũng theo dõi các Pod ở trạng thái bound và được xếp lịch chạy trên node đó (bằng cách định kỳ lấy thông tin từ api-server). Ví dụ trong trường hợp này kubelet trên node1 phát hiện Pod mới được yêu cầu chạy trên node1 nên nó sẽ lấy thông tin cần thiết cho Pod và chạy Pod này thành các container trên node1. sau đó update lại trạng thái của Pod cho api-server.
-
-6. API server nhận được thông tin cập nhật trạng thái Pod từ kubelet ở node1 thì nó thực hiện ghi thông tin này vào etcd và nhận phản hồi kết quả từ etcd. Sau đó nó gửi bản tin acknowledgement tới kubelete để báo rằng event này đã được chấp nhận.
-
-**Xóa Pod**
-Ngược lại với tạo Pod thì ta xem xét luồng xóa Pod như sau:
+The process for deleting a Pod occurs as follows:
 
 <div align="center">
   <img width="1000" src="./images/k8s-5.png" alt="Kubernetes">
 </div>
 
-Chi tiết luồng xóa Pod:
+Detailed flow for deleting a Pod:
 
-1. Người dùng gửi lệnh để xóa Pod
-2. Đối tượng Pod trên k8s được cập nhật trạng thái thành "dead" sau một khoảng thời gian gọi là grace-time
-3. Các hành động sau diễn ra song song:
-
-   - Pod sẽ hiện thị ở trạng thái "Terminating" khi được kiểm tra từ phía client
-   - Kubelet thấy một Pod được đánh dấu là Terminating thì nó bắt đầu thực hiện dừng process của Pod
-   - Endpoint controller theo dõi pod đã được xóa chưa để xóa thông tin pod đó khỏi các endpoint mà nó phục vụ
-
-4. Nếu pod có định nghĩa một preStop hook, thì nó được gọi tới bên trong pod. Nếu preStop hook vẫn đang chạy mà grace-time đã hết, thì bước (2) sẽ lại được gọi với thời gian grace-time nới thêm là 2 giây. Có thể tìm hiểu thêm về ["Container hook" ở đây](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/).
-
-5. Process bên trong Pod đã được gửi tín hiệu yêu cầu terminate (TERM signal)
-   Sau khi grace-time kết thúc, thì mọi process bên trong Pod sẽ bị kill bởi SIGKILL.
-   Kubelet hoàn thành xóa Pod bằng cách gọi API server và set grace-time bằng 0, nghĩa là yêu cầu xóa ngay lập tức. Lúc này Pod sẽ không còn và client sẽ không thể thấy được Pod này nữa.
+1. The user issues a command to delete a Pod.
+2. The corresponding Pod object in Kubernetes is updated to a “dead” state after a period known as the grace period.
+3. Several actions occur concurrently:
+   - The Pod appears in a "Terminating" state when viewed from the client.
+   - The kubelet detects that the Pod is marked as Terminating and begins shutting down the Pod’s processes.
+   - The endpoint controller monitors the deletion status of the Pod to remove it from any endpoints it serves.
+4. If the Pod defines a preStop hook, that hook is executed inside the Pod. If the preStop hook is still running when the grace period expires, step (2) is restarted with an additional grace period of 2 seconds. (Learn more about [Container Hooks here](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/).)
+5. The processes inside the Pod first receive a terminate (TERM) signal. Once the grace period ends, all remaining processes within the Pod are forcibly killed with a SIGKILL signal. Finally, the kubelet finishes deleting the Pod by informing the API server and setting the grace period to 0, meaning the Pod is removed immediately and will no longer be visible to clients.
